@@ -1,0 +1,61 @@
+name: Build .NET Client Library (Windows Native AOT)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-client-library:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10.0 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore ClientLibrary/MUnique.Client.Library.csproj
+
+      - name: Build Client Library (Native AOT - x86)
+        run: |
+          dotnet publish ClientLibrary/MUnique.Client.Library.csproj `
+            -c Release `
+            -r win-x86 `
+            -p:PlatformTarget=x86 `
+            -p:ci=true `
+            -o publish-x86 `
+            --nologo
+
+      - name: List output files
+        run: |
+          Get-ChildItem -Path publish-x86 -Recurse | Format-Table Name, Length, LastWriteTime
+        shell: pwsh
+
+      - name: Upload x86 DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MUnique.Client.Library-win-x86
+          path: publish-x86/MUnique.Client.Library.dll
+          if-no-files-found: error
+
+      - name: Build Client Library (Native AOT - x64)
+        run: |
+          dotnet publish ClientLibrary/MUnique.Client.Library.csproj `
+            -c Release `
+            -r win-x64 `
+            -p:PlatformTarget=x64 `
+            -p:ci=true `
+            -o publish-x64 `
+            --nologo
+
+      - name: Upload x64 DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MUnique.Client.Library-win-x64
+          path: publish-x64/MUnique.Client.Library.dll
+          if-no-files-found: error
