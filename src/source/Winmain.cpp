@@ -48,6 +48,8 @@
 #include "w_MapHeaders.h"
 
 #include "w_PetProcess.h"
+#include <exception>
+#include <cstdio>
 
 
 
@@ -467,6 +469,7 @@ extern bool EnableFastInput;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+  try {
 #ifdef _EDITOR
     // Only forward messages to ImGui when editor is open
     // When editor is closed, we handle button clicks manually in RenderToolbarOpen
@@ -723,6 +726,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
 
     return DefWindowProc(hwnd, msg, wParam, lParam);
+  } catch (const std::exception& e) {
+    g_ErrorReport.Write(L"> EXCEPTION in WndProc: %hs\r\n", e.what());
+    return DefWindowProc(hwnd, msg, wParam, lParam);
+  } catch (...) {
+    g_ErrorReport.Write(L"> UNKNOWN EXCEPTION in WndProc\r\n");
+    return DefWindowProc(hwnd, msg, wParam, lParam);
+  }
 }
 
 wchar_t m_Username[11];
@@ -808,8 +818,9 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
 }
 
 double CPU_AVG = 0.0;
-void RecordCpuUsage() 
+void RecordCpuUsage()
 {
+  try {
     constexpr int max_recordings = 60;
     double CPU_Recordings[max_recordings] = { 0.0 };
     double currentAvg = 0.0;
@@ -853,6 +864,11 @@ void RecordCpuUsage()
         // Sleep to match a 60Hz frame rate as the basis
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
+  } catch (const std::exception& e) {
+    g_ErrorReport.Write(L"> EXCEPTION in CpuUsage thread: %hs\r\n", e.what());
+  } catch (...) {
+    g_ErrorReport.Write(L"> UNKNOWN EXCEPTION in CpuUsage thread\r\n");
+  }
 }
 
 // unlimited as default (same behavior as original)
@@ -883,7 +899,13 @@ MSG MainLoop()
             }
 
             TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            try {
+                DispatchMessage(&msg);
+            } catch (const std::exception& e) {
+                g_ErrorReport.Write(L"> EXCEPTION in DispatchMessage: %hs\r\n", e.what());
+            } catch (...) {
+                g_ErrorReport.Write(L"> UNKNOWN EXCEPTION in DispatchMessage\r\n");
+            }
             ++messageProcessed;
 
             if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
@@ -920,7 +942,13 @@ MSG MainLoop()
 #endif
 
                 // Render game scene (ImGui rendering happens inside before SwapBuffers)
-                RenderScene(g_hDC);
+                try {
+                    RenderScene(g_hDC);
+                } catch (const std::exception& e) {
+                    g_ErrorReport.Write(L"> EXCEPTION in RenderScene: %hs\r\n", e.what());
+                } catch (...) {
+                    g_ErrorReport.Write(L"> UNKNOWN EXCEPTION in RenderScene\r\n");
+                }
             }
         }
         else
@@ -1052,17 +1080,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     nModes = 0;
     while (EnumDisplaySettings(nullptr, nModes, &pDevmodes[nModes])) nModes++;
 
-    DWORD dwBitsPerPel = 16;
+    DWORD dwBitsPerPel = 32;
     for (int n1 = 0; n1 < nModes; n1++)
     {
         if (pDevmodes[n1].dmBitsPerPel == 16 && m_nColorDepth == 0) {
             dwBitsPerPel = 16; break;
         }
-        if (pDevmodes[n1].dmBitsPerPel == 24 && m_nColorDepth == 1) {
-            dwBitsPerPel = 24; break;
-        }
         if (pDevmodes[n1].dmBitsPerPel == 32 && m_nColorDepth == 1) {
             dwBitsPerPel = 32; break;
+        }
+        if (pDevmodes[n1].dmBitsPerPel == 24 && m_nColorDepth == 1) {
+            dwBitsPerPel = 24; break;
         }
     }
 
@@ -1139,8 +1167,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     pfd.nVersion = 1;
     pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
     pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 16;
-    pfd.cDepthBits = 16;
+    pfd.cColorBits = 32;
+    pfd.cDepthBits = 24;
 
     if (!(g_hDC = GetDC(g_hWnd)))
     {
@@ -1197,6 +1225,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
 
+  try {
     // Initialize game translations (always available)
     {
         i18n::Translator& translator = i18n::Translator::GetInstance();
@@ -1356,4 +1385,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     DestroyWindow();
 
     return msg.wParam;
+
+  } catch (const std::exception& e) {
+    g_ErrorReport.Write(L"> FATAL EXCEPTION during init/main: %hs\r\n", e.what());
+    FlushFileBuffers(g_ErrorReport.GetFileHandle());
+    char errorMsg[512];
+    snprintf(errorMsg, sizeof(errorMsg),
+        "Error fatal durante inicializacion:\n\n%s\n\nRevisa MuError.log para mas detalles.", e.what());
+    MessageBoxA(nullptr, errorMsg, "MU Giloria - Error", MB_OK | MB_ICONERROR);
+    return 1;
+  } catch (...) {
+    g_ErrorReport.Write(L"> FATAL UNKNOWN EXCEPTION during init/main\r\n");
+    FlushFileBuffers(g_ErrorReport.GetFileHandle());
+    MessageBoxA(nullptr,
+        "Error fatal desconocido durante inicializacion.\n\nRevisa MuError.log para mas detalles.",
+        "MU Giloria - Error", MB_OK | MB_ICONERROR);
+    return 1;
+  }
 }

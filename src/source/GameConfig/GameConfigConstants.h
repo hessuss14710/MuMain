@@ -38,11 +38,11 @@ namespace CfgKeys
 
 namespace CfgDefaults
 {
-    inline constexpr int  CfgDefaultWindowWidth  = 1024;
-    inline constexpr int  CfgDefaultWindowHeight = 768;
+    inline constexpr int  CfgDefaultWindowWidth  = 1600;
+    inline constexpr int  CfgDefaultWindowHeight = 1200;
     inline constexpr bool CfgDefaultWindowed     = true;
 
-    inline constexpr int  CfgDefaultColorDepth = 0;
+    inline constexpr int  CfgDefaultColorDepth = 1;
 
     inline constexpr bool CfgDefaultSoundEnabled = true;
     inline constexpr bool CfgDefaultMusicEnabled = false;

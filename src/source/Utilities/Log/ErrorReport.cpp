@@ -193,9 +193,12 @@ void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
 void CErrorReport::WriteOpenGLInfo(void)
 {
     Write(L"<OpenGL information>\r\n");
-    Write(L"Vendor\t\t: %ls\r\n", (wchar_t*)glGetString(GL_VENDOR));
-    Write(L"Render\t\t: %ls\r\n", (wchar_t*)glGetString(GL_RENDERER));
-    Write(L"OpenGL version\t: %ls\r\n", (wchar_t*)glGetString(GL_VERSION));
+    const char* vendor = (const char*)glGetString(GL_VENDOR);
+    const char* renderer = (const char*)glGetString(GL_RENDERER);
+    const char* version = (const char*)glGetString(GL_VERSION);
+    Write(L"Vendor\t\t: %hs\r\n", vendor ? vendor : "unknown");
+    Write(L"Render\t\t: %hs\r\n", renderer ? renderer : "unknown");
+    Write(L"OpenGL version\t: %hs\r\n", version ? version : "unknown");
     GLint iResult[2];
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, iResult);
     Write(L"Max Texture size\t: %d x %d\r\n", iResult[0], iResult[0]);
@@ -294,7 +297,27 @@ void GetOSVersion(ER_SystemInfo* si)
 
     OSVERSIONINFO osiOne;
     osiOne.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    GetVersionEx(&osiOne);
+
+    // Use RtlGetVersion from ntdll.dll - it returns the TRUE OS version
+    // regardless of application manifest (GetVersionEx lies without one)
+    typedef LONG (WINAPI *RtlGetVersionPtr)(OSVERSIONINFO*);
+    HMODULE hNtdll = GetModuleHandleA("ntdll.dll");
+    if (hNtdll)
+    {
+        RtlGetVersionPtr pRtlGetVersion = (RtlGetVersionPtr)GetProcAddress(hNtdll, "RtlGetVersion");
+        if (pRtlGetVersion)
+        {
+            pRtlGetVersion(&osiOne);
+        }
+        else
+        {
+            GetVersionEx(&osiOne);
+        }
+    }
+    else
+    {
+        GetVersionEx(&osiOne);
+    }
 
     int iBuildNumberType = 0;
     mu_swprintf(si->m_lpszOS, L"%ls %d.%d ", lpszUnknown, osiOne.dwMajorVersion, osiOne.dwMinorVersion);
@@ -379,6 +402,41 @@ void GetOSVersion(ER_SystemInfo* si)
         case 2:
             wcscpy(si->m_lpszOS, L"Windows 2003 family ");
             break;
+        }
+        break;
+    case 6:
+        switch (osiOne.dwMinorVersion)
+        {
+        case 0:
+            wcscpy(si->m_lpszOS, L"Windows Vista ");
+            break;
+        case 1:
+            wcscpy(si->m_lpszOS, L"Windows 7 ");
+            break;
+        case 2:
+            wcscpy(si->m_lpszOS, L"Windows 8 ");
+            break;
+        case 3:
+            wcscpy(si->m_lpszOS, L"Windows 8.1 ");
+            break;
+        default:
+            mu_swprintf(si->m_lpszOS, L"Windows NT 6.%d ", osiOne.dwMinorVersion);
+            break;
+        }
+        break;
+    case 10:
+        {
+            // Windows 10 and 11 both report dwMajorVersion=10
+            // Windows 11 has build number >= 22000
+            DWORD dwBuild = osiOne.dwBuildNumber;
+            if (dwBuild >= 22000)
+            {
+                wcscpy(si->m_lpszOS, L"Windows 11 ");
+            }
+            else
+            {
+                wcscpy(si->m_lpszOS, L"Windows 10 ");
+            }
         }
         break;
     }

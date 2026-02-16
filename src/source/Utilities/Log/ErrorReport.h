@@ -47,6 +47,7 @@ public:
     void WriteOpenGLInfo(void);
     void WriteImeInfo(HWND hWnd);
     void WriteSoundCardInfo(void);
+    HANDLE GetFileHandle(void) const { return m_hFile; }
 };
 
 extern CErrorReport g_ErrorReport;
