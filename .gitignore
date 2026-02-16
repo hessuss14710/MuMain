@@ -39,3 +39,11 @@ build-mingw/
 **/imgui.ini
 
 **/*.log
+
+# Launcher build artifacts
+mu-launcher/node_modules/
+mu-launcher/dist/
+mu-launcher/package-lock.json
+
+# Voice server
+voice-server/node_modules/

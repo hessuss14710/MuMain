@@ -1,0 +1,14 @@
+{
+  "name": "mu-giloria-launcher",
+  "version": "1.0.0",
+  "description": "MU Giloria Launcher with proximity voice chat",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.0"
+  }
+}

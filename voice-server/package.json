@@ -1,0 +1,13 @@
+{
+  "name": "mu-giloria-voice-server",
+  "version": "1.0.0",
+  "description": "Proximity voice chat server for MU Giloria",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "pg": "^8.13.0"
+  }
+}

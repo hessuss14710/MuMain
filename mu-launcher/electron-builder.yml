@@ -1,0 +1,9 @@
+appId: es.giloria.launcher
+productName: MU Giloria
+directories:
+  output: dist
+files:
+  - src/**/*
+win:
+  target: dir
+  icon: src/assets/icon.ico
