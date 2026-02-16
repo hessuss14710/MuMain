@@ -7,6 +7,7 @@ let gameRunning = false;
 const resolutionSelect = document.getElementById('resolution-select');
 const languageSelect = document.getElementById('language-select');
 const themeSelect = document.getElementById('theme-select');
+const characterNameInput = document.getElementById('character-name');
 const btnPlay = document.getElementById('btn-play');
 const btnMute = document.getElementById('btn-mute');
 const voiceStatusEl = document.getElementById('voice-status');
@@ -32,6 +33,7 @@ const statusBar = document.getElementById('status-bar');
   resolutionSelect.value = s.resolution || '1920x1080';
   languageSelect.value = lang;
   themeSelect.value = s.theme || 'dark';
+  characterNameInput.value = s.characterName || '';
 
   applyTheme(s.theme || 'dark');
   applyTranslations(lang);
@@ -51,6 +53,10 @@ function updateThemeOptions() {
 }
 
 // ── Events: Settings ──
+characterNameInput.addEventListener('change', () => {
+  setSetting('characterName', characterNameInput.value.trim());
+});
+
 resolutionSelect.addEventListener('change', () => {
   setSetting('resolution', resolutionSelect.value);
 });
@@ -70,6 +76,19 @@ themeSelect.addEventListener('change', () => {
 
 // ── Play button ──
 btnPlay.addEventListener('click', async () => {
+  const charName = characterNameInput.value.trim();
+
+  // Validate character name
+  if (!charName) {
+    statusBar.textContent = t('errorNoCharacter', lang);
+    statusBar.style.color = 'var(--danger)';
+    characterNameInput.focus();
+    characterNameInput.classList.add('input-error');
+    setTimeout(() => characterNameInput.classList.remove('input-error'), 2000);
+    return;
+  }
+
+  setSetting('characterName', charName);
   btnPlay.disabled = true;
 
   const result = await window.api.launchGame({
@@ -88,6 +107,9 @@ btnPlay.addEventListener('click', async () => {
   btnPlay.textContent = t('gameRunning', lang);
   statusBar.textContent = '';
   statusBar.style.color = '';
+
+  // Connect voice chat
+  voice.connect(config.voiceUrl, charName);
 });
 
 // ── Game closed ──

@@ -115,7 +115,7 @@ function writeConfigIni(server, resolution) {
   const res = RESOLUTIONS.find(r => r.label === resolution) || RESOLUTIONS[6];
   const srv = SERVERS[server] || SERVERS[0];
 
-  const content = `[CONNECTION SETTINGS]\r\nServerIP=${srv.address}\r\nServerPort=${srv.port}\r\n\r\n[Window]\r\nWidth=${res.width}\r\nHeight=${res.height}\r\nWindowed=1\r\n\r\n[LOGIN]\r\nVersion=1.03.34\r\nTestVersion=1.03.34\r\n`;
+  const content = `[CONNECTION SETTINGS]\r\nServerIP=${srv.address}\r\nServerPort=${srv.port}\r\n\r\n[Window]\r\nWidth=${res.width}\r\nHeight=${res.height}\r\nWindowed=1\r\n\r\n[LOGIN]\r\nVersion=1.03.34\r\nTestVersion=1.03.34\r\n\r\n[Audio]\r\nSoundEnabled=1\r\nMusicEnabled=1\r\nVolumeLevel=5\r\n`;
 
   try {
     fs.writeFileSync(configPath, content);
