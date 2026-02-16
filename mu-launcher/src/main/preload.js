@@ -7,4 +7,5 @@ contextBridge.exposeInMainWorld('api', {
   minimizeWindow: () => ipcRenderer.invoke('minimize-window'),
   closeApp: () => ipcRenderer.invoke('close-app'),
   onGameClosed: (cb) => ipcRenderer.on('game-closed', cb),
+  onGameError: (cb) => ipcRenderer.on('game-error', (_e, msg) => cb(msg)),
 });

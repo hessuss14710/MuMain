@@ -11,7 +11,6 @@ const VOICE_SERVER_URL = 'wss://giloria.es/voice';
 
 const SERVERS = [
   { name: 'MU Giloria (Season 6)', address: 'giloria.es', port: 44405 },
-  { name: 'MU Giloria (MuMain)', address: 'giloria.es', port: 44406 },
 ];
 
 const RESOLUTIONS = [
@@ -111,8 +110,8 @@ function updateTrayMenu() {
 }
 
 function writeConfigIni(server, resolution) {
-  const exeDir = path.dirname(process.execPath);
-  const configPath = path.join(exeDir, 'config.ini');
+  const gameDir = findGameDir() || path.dirname(process.execPath);
+  const configPath = path.join(gameDir, 'config.ini');
   const res = RESOLUTIONS.find(r => r.label === resolution) || RESOLUTIONS[6];
   const srv = SERVERS[server] || SERVERS[0];
 
@@ -125,25 +124,57 @@ function writeConfigIni(server, resolution) {
   }
 }
 
-function launchGame(server, resolution) {
-  const exeDir = path.dirname(process.execPath);
-  const mainExe = path.join(exeDir, 'main.exe');
-  const srv = SERVERS[server] || SERVERS[0];
+function findGameDir() {
+  // In production: directory of the packaged .exe
+  // In dev: current working directory
+  const candidates = [
+    path.dirname(process.execPath),
+    process.cwd(),
+    app.getAppPath(),
+    path.join(path.dirname(process.execPath), '..'),
+  ];
 
-  if (!fs.existsSync(mainExe)) {
+  for (const dir of candidates) {
+    if (fs.existsSync(path.join(dir, 'main.exe')) || fs.existsSync(path.join(dir, 'Main.exe'))) {
+      return dir;
+    }
+  }
+
+  return null;
+}
+
+function launchGame(server, resolution) {
+  const gameDir = findGameDir();
+
+  if (!gameDir) {
     return { success: false, error: 'main.exe not found. Place the launcher in the game directory.' };
   }
+
+  const mainExe = fs.existsSync(path.join(gameDir, 'Main.exe'))
+    ? path.join(gameDir, 'Main.exe')
+    : path.join(gameDir, 'main.exe');
+
+  const srv = SERVERS[server] || SERVERS[0];
 
   writeConfigIni(server, resolution);
 
   try {
     gameProcess = spawn(mainExe, ['connect', `/u${srv.address}`, `/p${srv.port}`], {
-      cwd: exeDir,
+      cwd: gameDir,
       detached: true,
       stdio: 'ignore',
     });
 
-    gameProcess.on('exit', () => {
+    gameProcess.on('error', (err) => {
+      console.error('Failed to start game:', err.message);
+      gameProcess = null;
+      if (mainWindow) {
+        mainWindow.webContents.send('game-error', err.message);
+        mainWindow.show();
+      }
+    });
+
+    gameProcess.on('exit', (code) => {
       gameProcess = null;
       if (mainWindow) {
         mainWindow.webContents.send('game-closed');

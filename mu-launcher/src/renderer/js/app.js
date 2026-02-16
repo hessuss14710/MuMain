@@ -4,8 +4,6 @@ let lang = 'es';
 let gameRunning = false;
 
 // DOM elements
-const characterInput = document.getElementById('character-name');
-const serverSelect = document.getElementById('server-select');
 const resolutionSelect = document.getElementById('resolution-select');
 const languageSelect = document.getElementById('language-select');
 const themeSelect = document.getElementById('theme-select');
@@ -22,14 +20,6 @@ const statusBar = document.getElementById('status-bar');
   const s = config.settings;
   lang = s.language || 'es';
 
-  // Populate servers
-  config.servers.forEach((srv, i) => {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = srv.name;
-    serverSelect.appendChild(opt);
-  });
-
   // Populate resolutions
   config.resolutions.forEach(res => {
     const opt = document.createElement('option');
@@ -39,8 +29,6 @@ const statusBar = document.getElementById('status-bar');
   });
 
   // Restore settings
-  characterInput.value = s.characterName || '';
-  serverSelect.value = s.server || 0;
   resolutionSelect.value = s.resolution || '1920x1080';
   languageSelect.value = lang;
   themeSelect.value = s.theme || 'dark';
@@ -63,14 +51,6 @@ function updateThemeOptions() {
 }
 
 // ── Events: Settings ──
-characterInput.addEventListener('input', () => {
-  setSetting('characterName', characterInput.value.trim());
-});
-
-serverSelect.addEventListener('change', () => {
-  setSetting('server', parseInt(serverSelect.value));
-});
-
 resolutionSelect.addEventListener('change', () => {
   setSetting('resolution', resolutionSelect.value);
 });
@@ -90,18 +70,10 @@ themeSelect.addEventListener('change', () => {
 
 // ── Play button ──
 btnPlay.addEventListener('click', async () => {
-  const charName = characterInput.value.trim();
-  if (!charName) {
-    characterInput.focus();
-    characterInput.style.borderColor = 'var(--danger)';
-    setTimeout(() => { characterInput.style.borderColor = ''; }, 2000);
-    return;
-  }
-
   btnPlay.disabled = true;
 
   const result = await window.api.launchGame({
-    server: parseInt(serverSelect.value),
+    server: 0,
     resolution: resolutionSelect.value,
   });
 
@@ -116,9 +88,6 @@ btnPlay.addEventListener('click', async () => {
   btnPlay.textContent = t('gameRunning', lang);
   statusBar.textContent = '';
   statusBar.style.color = '';
-
-  // Connect voice
-  voice.connect(config.voiceUrl, charName);
 });
 
 // ── Game closed ──
@@ -129,6 +98,15 @@ window.api.onGameClosed(() => {
   voice.disconnect();
   statusBar.textContent = t('gameClosed', lang);
   setTimeout(() => { statusBar.textContent = ''; }, 3000);
+});
+
+// ── Game error ──
+window.api.onGameError((msg) => {
+  gameRunning = false;
+  btnPlay.disabled = false;
+  btnPlay.textContent = t('play', lang);
+  statusBar.textContent = msg || t('errorLaunch', lang);
+  statusBar.style.color = 'var(--danger)';
 });
 
 // ── Mute ──
