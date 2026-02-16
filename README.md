@@ -259,6 +259,62 @@ The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.1
 will work as well. By default, it connects to localhost and port `44406`.
 The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 
+## MU Giloria Launcher
+
+The `mu-launcher/` directory contains a custom **Electron** launcher that replaces the standard OpenMU launcher.
+
+### Features
+- Frameless window with custom titlebar and system tray
+- Server and resolution selector
+- Writes `config.ini` and launches `main.exe` automatically
+- **Proximity voice chat** — WebRTC-based, integrated directly into the launcher
+- 4 visual themes: Dark, MU Blue, MU Red, Light
+- Internationalization: Spanish, English, Portuguese
+
+### How to build
+
+```bash
+cd mu-launcher
+npm install
+npm run build:win   # Produces a portable build in dist/
+```
+
+Place the built launcher in the same directory as `main.exe`.
+
+## Voice Server
+
+The `voice-server/` directory contains a **Node.js WebSocket server** that enables proximity-based voice chat between players.
+
+### How it works
+1. The launcher connects to the voice server via WebSocket (`wss://`)
+2. The server polls the OpenMU PostgreSQL database every 3 seconds for character positions
+3. Players on the **same map** within **40 tiles** are matched as voice peers
+4. Volume scales linearly: 100% at ≤15 tiles, 0% at ≥40 tiles
+5. Audio is transmitted **peer-to-peer** via WebRTC (the server only handles signaling)
+
+### Deployment (Docker)
+
+```yaml
+voice-server:
+  build: ./voice-server
+  environment:
+    DB_HOST: openmu-db
+    DB_PORT: 5432
+    DB_NAME: openmu
+    DB_USER: postgres
+    DB_PASSWORD: your_password
+    PORT: 8200
+    POLL_INTERVAL: 3000
+```
+
+### Running standalone
+
+```bash
+cd voice-server
+npm install
+DB_HOST=localhost DB_PASSWORD=your_password node server.js
+```
+
 ## Credits
 
   * Webzen
