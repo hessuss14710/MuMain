@@ -1180,20 +1180,32 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     GLuint PixelFormat;
 
-    if (!(PixelFormat = ChoosePixelFormat(g_hDC, &pfd)))
+    // Try MSAA pixel format first (queried via dummy window before main window creation)
+    int msaaFormat = QueryMSAAPixelFormat(hInstance, windowName);
+    if (msaaFormat > 0 && SetPixelFormat(g_hDC, msaaFormat, &pfd))
     {
-        g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
+        PixelFormat = msaaFormat;
+        g_ErrorReport.Write(L"> MSAA anti-aliasing enabled.\r\n");
     }
-
-    if (!SetPixelFormat(g_hDC, PixelFormat, &pfd))
+    else
     {
-        g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
+        // Fallback to standard pixel format
+        if (!(PixelFormat = ChoosePixelFormat(g_hDC, &pfd)))
+        {
+            g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
+            KillGLWindow();
+            MessageBox(nullptr, GlobalText[4], L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
+
+        if (!SetPixelFormat(g_hDC, PixelFormat, &pfd))
+        {
+            g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
+            KillGLWindow();
+            MessageBox(nullptr, GlobalText[4], L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
+        g_ErrorReport.Write(L"> MSAA not available, using standard pixel format.\r\n");
     }
 
     if (!(g_hRC = wglCreateContext(g_hDC)))
@@ -1211,6 +1223,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         MessageBox(nullptr, GlobalText[4], L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
+
+    // Enable MSAA if we got the multisample pixel format
+    if (msaaFormat > 0)
+        EnableMSAA();
 
     ShowWindow(g_hWnd, SW_SHOW);
     SetForegroundWindow(g_hWnd);

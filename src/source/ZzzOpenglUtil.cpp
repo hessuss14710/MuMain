@@ -753,128 +753,102 @@ int GetFPSLimit()
     return GetDeviceCaps(g_hDC, VREFRESH);
 }
 
-#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
-BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd, int iRequestMSAAValue, int& OutiPixelFormat)
+static bool g_bMSAAEnabled = false;
+
+int QueryMSAAPixelFormat(HINSTANCE hInstance, const wchar_t* className)
 {
-    BOOL bIsGLMultisampleSupported = FALSE;
+    // Create a temporary hidden window to query WGL extensions
+    HWND hDummyWnd = CreateWindowW(className, L"dummy", WS_OVERLAPPEDWINDOW,
+        0, 0, 1, 1, nullptr, nullptr, hInstance, nullptr);
+    if (!hDummyWnd)
+        return 0;
 
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
+    HDC hDummyDC = GetDC(hDummyWnd);
+    PIXELFORMATDESCRIPTOR pfd = {};
+    pfd.nSize = sizeof(pfd);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 32;
+    pfd.cDepthBits = 24;
 
-    // See If The String Exists In WGL!
-    if (!IsGLExtensionSupported(L"WGL_ARB_multisample"))
+    int basicFormat = ChoosePixelFormat(hDummyDC, &pfd);
+    if (!basicFormat || !SetPixelFormat(hDummyDC, basicFormat, &pfd))
     {
-        bIsGLMultisampleSupported = FALSE;
-        return FALSE;
+        ReleaseDC(hDummyWnd, hDummyDC);
+        DestroyWindow(hDummyWnd);
+        return 0;
     }
 
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-    // Get Our Pixel Format
-    PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress(L"wglChoosePixelFormatARB");
-    if (!wglChoosePixelFormatARB)
+    HGLRC hDummyRC = wglCreateContext(hDummyDC);
+    if (!hDummyRC || !wglMakeCurrent(hDummyDC, hDummyRC))
     {
-        bIsGLMultisampleSupported = FALSE;
-        return FALSE;
+        if (hDummyRC) wglDeleteContext(hDummyRC);
+        ReleaseDC(hDummyWnd, hDummyDC);
+        DestroyWindow(hDummyWnd);
+        return 0;
     }
 
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
+    // Query the extension function pointer (uses char*, not wchar_t*)
+    auto wglChoosePixelFormatARB = reinterpret_cast<PFNWGLCHOOSEPIXELFORMATARBPROC>(
+        wglGetProcAddress("wglChoosePixelFormatARB"));
 
-    // Get Our Current Device Context
-    HDC hDC = GetDC(hWnd);
+    int msaaPixelFormat = 0;
 
-    int		valid;
-    UINT	numFormats;
-    float	fAttributes[] = { 0,0 };
-
-    // These Attributes Are The Bits We Want To Test For In Our Sample
-    // Everything Is Pretty Standard, The Only One We Want To
-    // Really Focus On Is The SAMPLE BUFFERS ARB And WGL SAMPLES
-    // These Two Are Going To Do The Main Testing For Whether Or Not
-    // We Support Multisampling On This Hardware.
-    int iAttributes[] =
+    if (wglChoosePixelFormatARB)
     {
-        WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
-            WGL_SUPPORT_OPENGL_ARB,GL_TRUE,
-            WGL_ACCELERATION_ARB,WGL_FULL_ACCELERATION_ARB,
-            WGL_COLOR_BITS_ARB,24,
-            WGL_ALPHA_BITS_ARB,8,
-            WGL_DEPTH_BITS_ARB,16,
-            WGL_STENCIL_BITS_ARB,0,
-            WGL_DOUBLE_BUFFER_ARB,GL_TRUE,
-            WGL_SAMPLE_BUFFERS_ARB,GL_TRUE,
-            WGL_SAMPLES_ARB, iRequestMSAAValue,					// xN MultiSampling (N=4,2,1)
-            0,0
-    };
+        float fAttribs[] = { 0.0f, 0.0f };
 
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
+        // Try 4x MSAA first, then 2x
+        for (int samples : { 4, 2 })
+        {
+            int iAttribs[] = {
+                WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+                WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+                WGL_ACCELERATION_ARB,   WGL_FULL_ACCELERATION_ARB,
+                WGL_COLOR_BITS_ARB,     32,
+                WGL_DEPTH_BITS_ARB,     24,
+                WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
+                WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
+                WGL_SAMPLES_ARB,        samples,
+                0, 0
+            };
 
-    // First We Check To See If We Can Get A Pixel Format For 4 Samples
-    valid = wglChoosePixelFormatARB(hDC, iAttributes, fAttributes, 1, &OutiPixelFormat, &numFormats);
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // If We Returned True, And Our Format Count Is Greater Than 1
-    if (valid && numFormats >= 1)
-    {
-        bIsGLMultisampleSupported = TRUE;
-        return bIsGLMultisampleSupported;
+            int format = 0;
+            UINT numFormats = 0;
+            if (wglChoosePixelFormatARB(hDummyDC, iAttribs, fAttribs, 1, &format, &numFormats)
+                && numFormats >= 1)
+            {
+                msaaPixelFormat = format;
+                break;
+            }
+        }
     }
 
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
+    // Cleanup dummy context
+    wglMakeCurrent(nullptr, nullptr);
+    wglDeleteContext(hDummyRC);
+    ReleaseDC(hDummyWnd, hDummyDC);
+    DestroyWindow(hDummyWnd);
 
-    // Our Pixel Format With 4 Samples Failed, Test For 2 Samples
-    iAttributes[19] = 2;
-    valid = wglChoosePixelFormatARB(hDC, iAttributes, fAttributes, 1, &OutiPixelFormat, &numFormats);
-    if (valid && numFormats >= 1)
-    {
-        bIsGLMultisampleSupported = TRUE;
-        return bIsGLMultisampleSupported;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Return The Valid Format
-    return  bIsGLMultisampleSupported;
+    return msaaPixelFormat;
 }
 
-void SetEnableMultisample()
+void EnableMSAA()
 {
-    if (TRUE == g_bSupportedMSAA)
-    {
-        glEnable(GL_MULTISAMPLE_ARB);							// Enable Multisampling
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
+    g_bMSAAEnabled = true;
+    glEnable(GL_MULTISAMPLE_ARB);
 }
 
-void SetDisableMultisample()
+void DisableMSAA()
 {
-    if (TRUE == g_bSupportedMSAA)
-    {
-        glDisable(GL_MULTISAMPLE_ARB);							// Enable Multisampling
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
+    glDisable(GL_MULTISAMPLE_ARB);
 }
 
-#endif // LDS_ADD_MULTISAMPLEANTIALIASING
+bool IsMSAAEnabled()
+{
+    return g_bMSAAEnabled;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // render util

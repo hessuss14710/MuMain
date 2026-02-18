@@ -84,6 +84,11 @@ void EnableVSync();
 void DisableVSync();
 int GetFPSLimit();
 
+int QueryMSAAPixelFormat(HINSTANCE hInstance, const wchar_t* className);
+void EnableMSAA();
+void DisableMSAA();
+bool IsMSAAEnabled();
+
 void UpdateMousePositionn();
 inline void TEXCOORD(float* c, float u, float v)
 {
