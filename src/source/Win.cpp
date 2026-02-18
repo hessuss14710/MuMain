@@ -7,7 +7,7 @@
 #include "Input.h"
 #include "Button.h"
 
-CWin::CWin() : m_psprBg(NULL)
+CWin::CWin() : m_psprBg(NULL), m_fScaleX(1.0f), m_fScaleY(1.0f)
 {
 }
 
@@ -20,10 +20,14 @@ void CWin::Create(int nWidth, int nHeight, int nTexID, bool bTile)
 {
     Release();
 
+    m_fScaleX = (float)WindowWidth / 800.0f;
+    m_fScaleY = (float)WindowHeight / 600.0f;
+
     if (-2 < nTexID)
     {
         m_psprBg = new CSprite;
-        m_psprBg->Create(nWidth, nHeight, nTexID, 0, NULL, 0, 0, bTile);
+        m_psprBg->Create(nWidth, nHeight, nTexID, 0, NULL, 0, 0, bTile,
+            SPR_SIZING_DATUMS_LT, m_fScaleX, m_fScaleY);
         if (-1 == nTexID)
         {
             m_psprBg->SetAlpha(128);
@@ -85,15 +89,21 @@ bool CWin::CursorInWin(int nArea)
     switch (nArea)
     {
     case WA_ALL:
-        ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx,
-            m_ptPos.y + m_Size.cy);
+        ::SetRect(&rc,
+            (int)(m_ptPos.x * m_fScaleX),
+            (int)(m_ptPos.y * m_fScaleY),
+            (int)((m_ptPos.x + m_Size.cx) * m_fScaleX),
+            (int)((m_ptPos.y + m_Size.cy) * m_fScaleY));
         if (::PtInRect(&rc, rInput.GetCursorPos()))
             return true;
         break;
 
     case WA_MOVE:
-        ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx,
-            m_ptPos.y + 26);
+        ::SetRect(&rc,
+            (int)(m_ptPos.x * m_fScaleX),
+            (int)(m_ptPos.y * m_fScaleY),
+            (int)((m_ptPos.x + m_Size.cx) * m_fScaleX),
+            (int)((m_ptPos.y + 26) * m_fScaleY));
         if (::PtInRect(&rc, rInput.GetCursorPos()))
             return true;
         break;
@@ -171,8 +181,10 @@ void CWin::Update(double dDeltaTick)
 
     if (WS_MOVE == m_nState)
     {
-        m_ptTemp.x += rInput.GetCursorX() - m_ptHeld.x;
-        m_ptTemp.y += rInput.GetCursorY() - m_ptHeld.y;
+        int dx = rInput.GetCursorX() - m_ptHeld.x;
+        int dy = rInput.GetCursorY() - m_ptHeld.y;
+        m_ptTemp.x += (int)(dx / m_fScaleX);
+        m_ptTemp.y += (int)(dy / m_fScaleY);
         if (!m_bDocking)
             SetPosition(m_ptTemp.x, m_ptTemp.y);
         m_ptHeld = rInput.GetCursorPos();

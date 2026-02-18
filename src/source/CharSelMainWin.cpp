@@ -106,11 +106,9 @@ CCharSelMainWin::~CCharSelMainWin()
 
 void CCharSelMainWin::Create()
 {
-    CInput& input = CInput::Instance();
-
     m_asprBack[CSMW_SPR_DECO].Create(189, 103, BITMAP_LOG_IN + 2);
     m_asprBack[CSMW_SPR_INFO].Create(
-        input.GetScreenWidth() - 266, kInfoSpriteHeight);
+        800 - 266, kInfoSpriteHeight);
     m_asprBack[CSMW_SPR_INFO].SetColor(0, 0, 0);
     m_asprBack[CSMW_SPR_INFO].SetAlpha(kWindowAlpha);
 
@@ -123,8 +121,17 @@ void CCharSelMainWin::Create()
         m_aBtn[0].GetWidth() * CSMW_BTN_MAX + m_asprBack[CSMW_SPR_INFO].GetWidth() + 6,
         m_aBtn[0].GetHeight(), -2);
 
+    float fsx = CWin::m_fScaleX;
+    float fsy = CWin::m_fScaleY;
+
+    for (auto& sprite : m_asprBack)
+        sprite.SetScaleFactor(fsx, fsy);
+
     for (int i = 0; i < CSMW_BTN_MAX; ++i)
+    {
+        m_aBtn[i].SetScaleFactor(fsx, fsy);
         CWin::RegisterButton(&m_aBtn[i]);
+    }
 
     m_bAccountBlockItem = HasAccountBlockedCharacter();
 }

@@ -4941,7 +4941,7 @@ void OpenBasicData(HDC hDC)
     LoadBitmap(L"Interface\\win_man.jpg", BITMAP_INTERFACE_EX + 17);
     LoadBitmap(L"Interface\\win_push.jpg", BITMAP_INTERFACE_EX + 18);
     LoadBitmap(L"Interface\\win_question.tga", BITMAP_INTERFACE_EX + 20);
-    LoadBitmap(L"Local\\Webzenlogo.jpg", BITMAP_INTERFACE_EX + 22);
+    LoadBitmap(L"Local\\GiloriaLogo.jpg", BITMAP_INTERFACE_EX + 22);
 
 #ifdef DUEL_SYSTEM
     LoadWaveFile(SOUND_OPEN_DUELWINDOW, L"Data\\Sound\\iDuelWindow.wav", 1);

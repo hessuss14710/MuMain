@@ -94,6 +94,7 @@ public:
     {
         m_byRed = byRed;	m_byGreen = byGreen;	m_byBlue = byBlue;
     }
+    void SetScaleFactor(float fScaleX, float fScaleY);
     void SetAction(int nStartFrame, int nEndFrame, double dDelayTime = 0.0,
         bool bRepeat = true);
     void SetNowFrame(int nFrame);

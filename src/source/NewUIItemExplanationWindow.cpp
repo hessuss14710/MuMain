@@ -99,28 +99,29 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     int iLabelHeight = 0;
     int iDataHeight = 0;
 
-    switch (WindowWidth)
+    if (WindowWidth <= 640)
     {
-    case 640:
         iInfoWidth = 90;
         iLabelHeight = 38;
         iDataHeight = 52;
-        break;
-    case 800:
+    }
+    else if (WindowWidth <= 800)
+    {
         iInfoWidth = 90;
         iLabelHeight = 33;
         iDataHeight = 47;
-        break;
-    case 1024:
+    }
+    else if (WindowWidth <= 1024)
+    {
         iInfoWidth = 103;
         iLabelHeight = 28;
         iDataHeight = 40;
-        break;
-    case 1280:
+    }
+    else
+    {
         iInfoWidth = 123;
         iLabelHeight = 22;
         iDataHeight = 32;
-        break;
     }
 
     int iType = 0;
@@ -155,9 +156,9 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     {
         iType = 5;
 
-        if (WindowWidth == 640 || WindowWidth == 1280)
+        if (WindowWidth <= 640 || WindowWidth >= 1280)
             TabSpace += int(5940 / iInfoWidth);
-        else if (WindowWidth == 800 || WindowWidth == 1024)
+        else
             TabSpace += int(5200 / iInfoWidth);
     }
     else

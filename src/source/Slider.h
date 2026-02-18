@@ -18,6 +18,8 @@ class CSlider
 protected:
     bool		m_bVertical;
     BYTE		m_byState;
+    float		m_fScaleX;
+    float		m_fScaleY;
 
     POINT		m_ptPos;
     SIZE		m_Size;
@@ -47,6 +49,7 @@ public:
     void SetSlideRange(int nSlideRange);
     void Update(double dDeltaTick);
     void Render();
+    void SetScaleFactor(float fScaleX, float fScaleY);
     void SetEnable(bool bEnable);
     bool IsEnable() { return m_btnThumb.IsEnable(); }
     void Show(bool bShow);

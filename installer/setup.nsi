@@ -17,13 +17,28 @@ RequestExecutionLevel user
 
 ;--------------------------------
 ; Interface Settings
-!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
-!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+
+; Custom icons
+!define MUI_ICON "giloria.ico"
+!define MUI_UNICON "giloria.ico"
+
+; Custom graphics
+!define MUI_WELCOMEFINISHPAGE_BITMAP "wizard.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "wizard.bmp"
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_BITMAP "header.bmp"
+!define MUI_HEADERIMAGE_RIGHT
+
+; Branding
 !define MUI_ABORTWARNING
-!define MUI_WELCOMEPAGE_TITLE "MU Giloria Season 6"
-!define MUI_WELCOMEPAGE_TEXT "Este asistente instalara MU Giloria Season 6 en tu equipo.$\r$\n$\r$\nSe recomienda cerrar todas las aplicaciones antes de continuar.$\r$\n$\r$\nPulsa Siguiente para continuar."
+!define MUI_WELCOMEPAGE_TITLE "MU Giloria Season 6 · Episode 3"
+!define MUI_WELCOMEPAGE_TEXT "Bienvenido al instalador de MU Giloria.$\r$\n$\r$\nExperiencia clasica de MU Online Season 6 Episode 3 con texturas HD, voice chat por proximidad y servidor dedicado.$\r$\n$\r$\nSe recomienda cerrar todas las aplicaciones antes de continuar.$\r$\n$\r$\nPulsa Siguiente para continuar."
+!define MUI_FINISHPAGE_TITLE "MU Giloria instalado correctamente"
+!define MUI_FINISHPAGE_TEXT "MU Giloria Season 6 se ha instalado en tu equipo.$\r$\n$\r$\nPulsa Terminar para cerrar el asistente."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\MU Giloria.exe"
 !define MUI_FINISHPAGE_RUN_TEXT "Ejecutar MU Giloria"
+!define MUI_FINISHPAGE_LINK "giloria.es - Sitio web oficial"
+!define MUI_FINISHPAGE_LINK_LOCATION "https://giloria.es"
 
 ;--------------------------------
 ; Pages

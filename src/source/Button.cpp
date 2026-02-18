@@ -209,10 +209,10 @@ void CButton::Render()
 
     const float textRelativeYPos = (static_cast<float>(CSprite::GetHeight()) - size.cy) * 0.5f;
     g_pRenderText->RenderText(
-        static_cast<int>(CSprite::GetXPos() / g_fScreenRate_x),
-        static_cast<int>((static_cast<float>(CSprite::GetYPos()) + textRelativeYPos) / g_fScreenRate_y + m_fTextAddYPos),
+        static_cast<int>(CSprite::GetXPos() * GetScaleX() / g_fScreenRate_x),
+        static_cast<int>((static_cast<float>(CSprite::GetYPos()) + textRelativeYPos) * GetScaleY() / g_fScreenRate_y + m_fTextAddYPos),
         m_text.c_str(),
-        CSprite::GetWidth() / g_fScreenRate_x,
+        CSprite::GetWidth() * GetScaleX() / g_fScreenRate_x,
         0,
         RT3_SORT_CENTER);
 }

@@ -32,8 +32,7 @@ COptionWin::~COptionWin()
 
 void COptionWin::Create()
 {
-    CInput rInput = CInput::Instance();
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+    CWin::Create(800, 600);
 
     SImgInfo aiiBack[WE_BG_MAX] =
     {
@@ -46,14 +45,19 @@ void COptionWin::Create()
     m_winBack.Create(aiiBack, 1, 30);
     m_winBack.SetLine(30);
 
+    float fsx = CWin::m_fScaleX;
+    float fsy = CWin::m_fScaleY;
+
     for (int i = 0; i <= OW_BTN_SLIDE_HELP; ++i)
     {
         m_aBtn[i].Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
+        m_aBtn[i].SetScaleFactor(fsx, fsy);
         CWin::RegisterButton(&m_aBtn[i]);
     }
 
     DWORD adwBtnClr[4] = { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };
     m_aBtn[OW_BTN_CLOSE].Create(108, 30, BITMAP_TEXT_BTN, 4, 2, 1);
+    m_aBtn[OW_BTN_CLOSE].SetScaleFactor(fsx, fsy);
     m_aBtn[OW_BTN_CLOSE].SetText(GlobalText[388], adwBtnClr);
     CWin::RegisterButton(&m_aBtn[OW_BTN_CLOSE]);
 
@@ -63,13 +67,16 @@ void COptionWin::Create()
     RECT rcGauge = { 3, 3, 95, 10 };
 
     for (int i = 0; i < OW_SLD_MAX; ++i)
+    {
         m_aSlider[i].Create(&iiThumb, &iiBack, &iiGauge, &rcGauge);
+        m_aSlider[i].SetScaleFactor(fsx, fsy);
+    }
 
     m_aSlider[OW_SLD_EFFECT_VOL].SetSlideRange(9);
     m_aSlider[OW_SLD_RENDER_LV].SetSlideRange(4);
 
-    SetPosition((rInput.GetScreenWidth() - m_winBack.GetWidth()) / 2,
-        (rInput.GetScreenHeight() - m_winBack.GetHeight()) / 2);
+    SetPosition((800 - m_winBack.GetWidth()) / 2,
+        (600 - m_winBack.GetHeight()) / 2);
 
     UpdateDisplay();
 }
@@ -191,16 +198,16 @@ void COptionWin::RenderControls()
     g_pRenderText->SetFont(g_hFixFont);
     g_pRenderText->SetTextColor(CLRDW_WHITE);
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(int(m_winBack.GetXPos() / g_fScreenRate_x),
-        int((m_winBack.GetYPos() + 10) / g_fScreenRate_y),
-        GlobalText[385], m_winBack.GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(int(m_winBack.GetXPos() * m_fScaleX / g_fScreenRate_x),
+        int((m_winBack.GetYPos() + 10) * m_fScaleY / g_fScreenRate_y),
+        GlobalText[385], m_winBack.GetWidth() * m_fScaleX / g_fScreenRate_x, 0, RT3_SORT_CENTER);
 
     const wchar_t* apszBtnText[3] =
     { GlobalText[386], GlobalText[387], GlobalText[919] };
     for (int i = 0; i <= OW_BTN_SLIDE_HELP; ++i)
     {
-        g_pRenderText->RenderText(int((m_aBtn[i].GetXPos() + 24) / g_fScreenRate_x),
-            int((m_aBtn[i].GetYPos() + 4) / g_fScreenRate_y), apszBtnText[i]);
+        g_pRenderText->RenderText(int((m_aBtn[i].GetXPos() + 24) * m_fScaleX / g_fScreenRate_x),
+            int((m_aBtn[i].GetYPos() + 4) * m_fScaleY / g_fScreenRate_y), apszBtnText[i]);
     }
 
     int nTextPosY;
@@ -211,11 +218,11 @@ void COptionWin::RenderControls()
 
     for (int i = 0; i < OW_SLD_MAX; ++i)
     {
-        nTextPosY = int((m_aSlider[i].GetYPos() - 18) / g_fScreenRate_y);
-        g_pRenderText->RenderText(int(m_aSlider[i].GetXPos() / g_fScreenRate_x), nTextPosY, apszSldText[i]);
+        nTextPosY = int((m_aSlider[i].GetYPos() - 18) * m_fScaleY / g_fScreenRate_y);
+        g_pRenderText->RenderText(int(m_aSlider[i].GetXPos() * m_fScaleX / g_fScreenRate_x), nTextPosY, apszSldText[i]);
 
         ::_itow(anVal[i], szVal, 10);
-        g_pRenderText->RenderText(int((m_aSlider[i].GetXPos() + 85) / g_fScreenRate_x), nTextPosY, szVal);
+        g_pRenderText->RenderText(int((m_aSlider[i].GetXPos() + 85) * m_fScaleX / g_fScreenRate_x), nTextPosY, szVal);
 
         m_aSlider[i].Render();
     }

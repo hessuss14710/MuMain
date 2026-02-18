@@ -39,17 +39,21 @@ CMsgWin::~CMsgWin()
 
 void CMsgWin::Create()
 {
-    CInput rInput = CInput::Instance();
+    CWin::Create(800, 600);
 
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+    float fsx = CWin::m_fScaleX;
+    float fsy = CWin::m_fScaleY;
 
     m_sprBack.Create(352, 113, BITMAP_MESSAGE_WIN);
+    m_sprBack.SetScaleFactor(fsx, fsy);
 
     m_sprInput.Create(171, 23, BITMAP_MSG_WIN_INPUT);
+    m_sprInput.SetScaleFactor(fsx, fsy);
 
     for (int i = 0; i < 2; ++i)
     {
         m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
+        m_aBtn[i].SetScaleFactor(fsx, fsy);
         CWin::RegisterButton(&m_aBtn[i]);
     }
 
@@ -98,8 +102,8 @@ void CMsgWin::SetCtrlPosition()
         if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
             if (g_iChatInputType == 1)
                 g_pSinglePasswdInputBox->SetPosition(
-                    int((m_sprInput.GetXPos() + 10) / g_fScreenRate_x),
-                    int((m_sprInput.GetYPos() + 8) / g_fScreenRate_y));
+                    int((m_sprInput.GetXPos() + 10) * m_fScaleX / g_fScreenRate_x),
+                    int((m_sprInput.GetYPos() + 8) * m_fScaleY / g_fScreenRate_y));
         break;
     }
 }
@@ -225,27 +229,27 @@ void CMsgWin::RenderControls()
 
     if (1 == m_nMsgLine)
     {
-        nTextPosX = int(m_sprBack.GetXPos() / g_fScreenRate_x);
+        nTextPosX = int(m_sprBack.GetXPos() * m_fScaleX / g_fScreenRate_x);
         if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 38) / g_fScreenRate_y);
+            nTextPosY = int((m_sprBack.GetYPos() + 38) * m_fScaleY / g_fScreenRate_y);
         else
-            nTextPosY = int((m_sprBack.GetYPos() + 54) / g_fScreenRate_y);
+            nTextPosY = int((m_sprBack.GetYPos() + 54) * m_fScaleY / g_fScreenRate_y);
         g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[0],
-            m_sprBack.GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
+            m_sprBack.GetWidth() * m_fScaleX / g_fScreenRate_x, 0, RT3_SORT_CENTER);
     }
     else if (2 == m_nMsgLine)
     {
-        nTextPosX = int((m_sprBack.GetXPos() + 25) / g_fScreenRate_x);
+        nTextPosX = int((m_sprBack.GetXPos() + 25) * m_fScaleX / g_fScreenRate_x);
         if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 32) / g_fScreenRate_y);
+            nTextPosY = int((m_sprBack.GetYPos() + 32) * m_fScaleY / g_fScreenRate_y);
         else
-            nTextPosY = int((m_sprBack.GetYPos() + 44) / g_fScreenRate_y);
+            nTextPosY = int((m_sprBack.GetYPos() + 44) * m_fScaleY / g_fScreenRate_y);
         g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[0]);
 
         if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 51) / g_fScreenRate_y);
+            nTextPosY = int((m_sprBack.GetYPos() + 51) * m_fScaleY / g_fScreenRate_y);
         else
-            nTextPosY = int((m_sprBack.GetYPos() + 66) / g_fScreenRate_y);
+            nTextPosY = int((m_sprBack.GetYPos() + 66) * m_fScaleY / g_fScreenRate_y);
         g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[1]);
     }
 
@@ -259,8 +263,8 @@ void CMsgWin::RenderControls()
         {
             InputTextWidth = 100;
             ::RenderInputText(
-                int((m_sprInput.GetXPos() + 10) / g_fScreenRate_x),
-                int((m_sprInput.GetYPos() + 8) / g_fScreenRate_y), 0, 0);
+                int((m_sprInput.GetXPos() + 10) * m_fScaleX / g_fScreenRate_x),
+                int((m_sprInput.GetYPos() + 8) * m_fScaleY / g_fScreenRate_y), 0, 0);
             InputTextWidth = 256;
         }
     }

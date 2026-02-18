@@ -216,6 +216,13 @@ BOOL CSprite::CursorInObject()
     return PtInSprite(rInput.GetCursorX(), rInput.GetCursorY());
 }
 
+void CSprite::SetScaleFactor(float fScaleX, float fScaleY)
+{
+    m_fScaleX = fScaleX;
+    m_fScaleY = fScaleY;
+    m_fScrHeight = (float)WindowHeight / fScaleY;
+}
+
 void CSprite::SetAction(int nStartFrame, int nEndFrame, double dDelayTime,
     bool bRepeat)
 {

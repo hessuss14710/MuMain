@@ -10,7 +10,7 @@
 #define SLD_FIRST_SLIDE_DELAY_TIME	500
 #define SLD_SLIDE_DELAY_TIME		50
 
-CSlider::CSlider() : m_pGaugeBar(NULL), m_psprBack(NULL)
+CSlider::CSlider() : m_pGaugeBar(NULL), m_psprBack(NULL), m_fScaleX(1.0f), m_fScaleY(1.0f)
 {
 }
 
@@ -163,15 +163,23 @@ void CSlider::Update(double dDeltaTick)
     }
 
     RECT rcUpperThumb, rcUnderThumb;
+    int sx = (int)(m_ptPos.x * m_fScaleX);
+    int sy = (int)(m_ptPos.y * m_fScaleY);
+    int sr = (int)((m_ptPos.x + m_Size.cx) * m_fScaleX);
+    int sb = (int)((m_ptPos.y + m_Size.cy) * m_fScaleY);
+    int thumbX = (int)(m_btnThumb.GetXPos() * m_fScaleX);
+    int thumbY = (int)(m_btnThumb.GetYPos() * m_fScaleY);
+    int thumbW = (int)(m_btnThumb.GetWidth() * m_fScaleX);
+    int thumbH = (int)(m_btnThumb.GetHeight() * m_fScaleY);
     if (m_bVertical)
     {
-        ::SetRect(&rcUpperThumb, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_btnThumb.GetYPos());
-        ::SetRect(&rcUnderThumb, m_ptPos.x, m_btnThumb.GetYPos() + m_btnThumb.GetHeight(), m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+        ::SetRect(&rcUpperThumb, sx, sy, sr, thumbY);
+        ::SetRect(&rcUnderThumb, sx, thumbY + thumbH, sr, sb);
     }
     else
     {
-        ::SetRect(&rcUpperThumb, m_ptPos.x, m_ptPos.y, m_btnThumb.GetXPos(), m_ptPos.y + m_Size.cy);
-        ::SetRect(&rcUnderThumb, m_btnThumb.GetXPos() + m_btnThumb.GetWidth(), m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+        ::SetRect(&rcUpperThumb, sx, sy, thumbX, sb);
+        ::SetRect(&rcUnderThumb, thumbX + thumbW, sy, sr, sb);
     }
 
     POINT ptCursor = rInput.GetCursorPos();
@@ -219,16 +227,20 @@ void CSlider::Update(double dDeltaTick)
         }
     }
 
+    // Convert cursor to logical space for drag calculations
+    int curLogX = (int)(ptCursor.x / m_fScaleX);
+    int curLogY = (int)(ptCursor.y / m_fScaleY);
+
     if (m_btnThumb.CursorInObject() && rInput.IsLBtnHeldDn())
     {
         if (m_bVertical)
         {
-            m_nCapturePos = ptCursor.y;
+            m_nCapturePos = curLogY;
             m_nLimitPos = m_ptPos.y + m_nCapturePos - m_btnThumb.GetYPos();
         }
         else
         {
-            m_nCapturePos = ptCursor.x;
+            m_nCapturePos = curLogX;
             m_nLimitPos = m_ptPos.x + m_nCapturePos - m_btnThumb.GetXPos();
         }
         m_byState |= SLD_STATE_THUMB_DRG;
@@ -239,12 +251,12 @@ void CSlider::Update(double dDeltaTick)
         int nThumbPos;
         if (m_bVertical)
         {
-            if (m_nLimitPos < ptCursor.y && m_nLimitPos + m_nThumbRange > ptCursor.y)
+            if (m_nLimitPos < curLogY && m_nLimitPos + m_nThumbRange > curLogY)
             {
-                nThumbPos = m_btnThumb.GetYPos() + rInput.GetCursorY() - m_nCapturePos;
-                m_nCapturePos = ptCursor.y;
+                nThumbPos = m_btnThumb.GetYPos() + curLogY - m_nCapturePos;
+                m_nCapturePos = curLogY;
             }
-            else if (m_nLimitPos >= ptCursor.y)
+            else if (m_nLimitPos >= curLogY)
             {
                 nThumbPos = m_ptPos.y;
                 m_nCapturePos = m_nLimitPos;
@@ -255,20 +267,18 @@ void CSlider::Update(double dDeltaTick)
                 m_nCapturePos = m_nLimitPos + m_nThumbRange;
             }
             m_btnThumb.SetPosition(m_btnThumb.GetXPos(), nThumbPos);
-            //			m_btnThumb.SetAction(BTN_HIGHLIGHT_DOWN, BTN_HIGHLIGHT_DOWN);
 
-                    // m_nSlidePos 구하기.
             float fPixelPerPos = (float)m_nThumbRange / m_nSlideRange;
             m_nSlidePos = int((float(m_btnThumb.GetYPos() - m_ptPos.y) + (fPixelPerPos / 2)) / fPixelPerPos);
         }
         else
         {
-            if (m_nLimitPos < ptCursor.x && m_nLimitPos + m_nThumbRange > ptCursor.x)
+            if (m_nLimitPos < curLogX && m_nLimitPos + m_nThumbRange > curLogX)
             {
-                nThumbPos = m_btnThumb.GetXPos() + ptCursor.x - m_nCapturePos;
-                m_nCapturePos = ptCursor.x;
+                nThumbPos = m_btnThumb.GetXPos() + curLogX - m_nCapturePos;
+                m_nCapturePos = curLogX;
             }
-            else if (m_nLimitPos >= ptCursor.x)
+            else if (m_nLimitPos >= curLogX)
             {
                 nThumbPos = m_ptPos.x;
                 m_nCapturePos = m_nLimitPos;
@@ -279,12 +289,11 @@ void CSlider::Update(double dDeltaTick)
                 m_nCapturePos = m_nLimitPos + m_nThumbRange;
             }
             m_btnThumb.SetPosition(nThumbPos, m_btnThumb.GetYPos());
-            //			m_btnThumb.SetAction(BTN_HIGHLIGHT_DOWN, BTN_HIGHLIGHT_DOWN);
 
             float fPixelPerPos = (float)m_nThumbRange / m_nSlideRange;
             m_nSlidePos = int((float(m_btnThumb.GetXPos() - m_ptPos.x) + (fPixelPerPos / 2)) / fPixelPerPos);
             m_pGaugeBar->SetValue(m_nSlidePos, m_nSlideRange);
-        }	// if (m_bVertical) else문 끝.
+        }
     }
 }
 
@@ -298,6 +307,17 @@ void CSlider::Render()
     else if (m_psprBack)
         m_psprBack->Render();
     m_btnThumb.Render();
+}
+
+void CSlider::SetScaleFactor(float fScaleX, float fScaleY)
+{
+    m_fScaleX = fScaleX;
+    m_fScaleY = fScaleY;
+    m_btnThumb.SetScaleFactor(fScaleX, fScaleY);
+    if (m_pGaugeBar)
+        m_pGaugeBar->SetScaleFactor(fScaleX, fScaleY);
+    if (m_psprBack)
+        m_psprBack->SetScaleFactor(fScaleX, fScaleY);
 }
 
 void CSlider::SetEnable(bool bEnable)
@@ -321,7 +341,11 @@ BOOL CSlider::CursorInObject()
 {
     if (m_btnThumb.IsShow())
     {
-        RECT rcSlider = { m_ptPos.x, m_ptPos.y,	m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy };
+        RECT rcSlider = {
+            (int)(m_ptPos.x * m_fScaleX),
+            (int)(m_ptPos.y * m_fScaleY),
+            (int)((m_ptPos.x + m_Size.cx) * m_fScaleX),
+            (int)((m_ptPos.y + m_Size.cy) * m_fScaleY) };
         return ::PtInRect(&rcSlider, CInput::Instance().GetCursorPos());
     }
 

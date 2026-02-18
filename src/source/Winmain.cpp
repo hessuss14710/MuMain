@@ -993,9 +993,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_ErrorReport.Write(L"\r\n");
     g_ErrorReport.WriteLogBegin();
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+    g_ErrorReport.Write(L"MU Giloria %ls (%ls) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"MU Giloria (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
 
     g_ErrorReport.WriteCurrentTime();
     ER_SystemInfo si;
@@ -1113,7 +1113,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     g_hInst = hInstance;
 
-    const wchar_t* windowName = L"MU Online";
+    const wchar_t* windowName = L"MU Giloria";
     WNDCLASS wndClass;
 
     wndClass.style = CS_HREDRAW | CS_VREDRAW;

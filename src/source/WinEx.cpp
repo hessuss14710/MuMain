@@ -24,6 +24,9 @@ void CWinEx::Create(SImgInfo* aImgInfo, int nBgSideMin, int nBgSideMax)
 {
     Release();
 
+    CWin::m_fScaleX = (float)WindowWidth / 800.0f;
+    CWin::m_fScaleY = (float)WindowHeight / 600.0f;
+
     CWin::m_psprBg = new CSprite[WE_BG_MAX];
 
     CWin::m_psprBg[WE_BG_CENTER].Create(aImgInfo, 0, 0, true);
@@ -31,6 +34,9 @@ void CWinEx::Create(SImgInfo* aImgInfo, int nBgSideMin, int nBgSideMax)
     CWin::m_psprBg[WE_BG_BOTTOM].Create(aImgInfo + 2);
     CWin::m_psprBg[WE_BG_LEFT].Create(aImgInfo + 3, 0, 0, true);
     CWin::m_psprBg[WE_BG_RIGHT].Create(aImgInfo + 4, 0, 0, true);
+
+    for (int i = 0; i < WE_BG_MAX; ++i)
+        CWin::m_psprBg[i].SetScaleFactor(CWin::m_fScaleX, CWin::m_fScaleY);
 
     CWin::m_psprBg[WE_BG_CENTER].SetSize(CWin::m_psprBg[WE_BG_TOP].GetWidth() - WE_CENTER_SPR_POS * 2, 0, X);
 
@@ -132,16 +138,21 @@ bool CWinEx::CursorInWin(int nArea)
     switch (nArea)
     {
     case WA_EXTEND_DN:
-        ::SetRect(&rc, CWin::m_ptPos.x, CWin::m_ptPos.y + CWin::m_Size.cy - 5,
-            CWin::m_ptPos.x + CWin::m_Size.cx,
-            CWin::m_ptPos.y + CWin::m_Size.cy);
+        ::SetRect(&rc,
+            (int)(CWin::m_ptPos.x * CWin::m_fScaleX),
+            (int)((CWin::m_ptPos.y + CWin::m_Size.cy - 5) * CWin::m_fScaleY),
+            (int)((CWin::m_ptPos.x + CWin::m_Size.cx) * CWin::m_fScaleX),
+            (int)((CWin::m_ptPos.y + CWin::m_Size.cy) * CWin::m_fScaleY));
         if (::PtInRect(&rc, rInput.GetCursorPos()))
             return true;
         break;
 
     case WA_EXTEND_UP:
-        ::SetRect(&rc, CWin::m_ptPos.x, CWin::m_ptPos.y,
-            CWin::m_ptPos.x + CWin::m_Size.cx, CWin::m_ptPos.y + 4);
+        ::SetRect(&rc,
+            (int)(CWin::m_ptPos.x * CWin::m_fScaleX),
+            (int)(CWin::m_ptPos.y * CWin::m_fScaleY),
+            (int)((CWin::m_ptPos.x + CWin::m_Size.cx) * CWin::m_fScaleX),
+            (int)((CWin::m_ptPos.y + 4) * CWin::m_fScaleY));
         if (::PtInRect(&rc, rInput.GetCursorPos()))
             return true;
         break;
@@ -185,7 +196,7 @@ void CWinEx::CheckAdditionalState()
     switch (CWin::m_nState)
     {
     case WS_EXTEND_UP:
-        nBgSideHeight = m_nBasisY - rInput.GetCursorY();
+        nBgSideHeight = m_nBasisY - (int)(rInput.GetCursorY() / CWin::m_fScaleY);
         if (nBgSideHeight
             < CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideMin)
             SetLine(m_nBgSideMin);
@@ -199,7 +210,7 @@ void CWinEx::CheckAdditionalState()
         break;
 
     case WS_EXTEND_DN:
-        nBgSideHeight = rInput.GetCursorY() - m_nBasisY;
+        nBgSideHeight = (int)(rInput.GetCursorY() / CWin::m_fScaleY) - m_nBasisY;
         if (nBgSideHeight
             < CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideMin)
             SetLine(m_nBgSideMin);

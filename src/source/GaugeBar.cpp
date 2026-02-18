@@ -119,6 +119,13 @@ int CGaugeBar::GetHeight() const
     return m_gaugeRect.bottom - m_gaugeRect.top;
 }
 
+void CGaugeBar::SetScaleFactor(float fScaleX, float fScaleY)
+{
+    m_sprGauge.SetScaleFactor(fScaleX, fScaleY);
+    if (m_backgroundSprite)
+        m_backgroundSprite->SetScaleFactor(fScaleX, fScaleY);
+}
+
 void CGaugeBar::SetValue(std::uint32_t dwNow, std::uint32_t dwTotal)
 {
     const std::uint32_t safeTotal = std::max<std::uint32_t>(dwTotal, 1u);

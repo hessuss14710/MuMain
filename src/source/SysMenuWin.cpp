@@ -31,8 +31,7 @@ CSysMenuWin::~CSysMenuWin()
 
 void CSysMenuWin::Create()
 {
-    CInput rInput = CInput::Instance();
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+    CWin::Create(800, 600);
 
     SImgInfo aiiBack[WE_BG_MAX] =
     {
@@ -44,6 +43,9 @@ void CSysMenuWin::Create()
     };
     m_winBack.Create(aiiBack, 1, 10);
 
+    float fsx = CWin::m_fScaleX;
+    float fsy = CWin::m_fScaleY;
+
     const wchar_t* apszBtnText[SMW_BTN_MAX] =
     { GlobalText[381], GlobalText[382], GlobalText[385], GlobalText[388] };
     DWORD adwBtnClr[4] =
@@ -51,6 +53,7 @@ void CSysMenuWin::Create()
     for (int i = 0; i < SMW_BTN_MAX; ++i)
     {
         m_aBtn[i].Create(108, 30, BITMAP_TEXT_BTN, 4, 2, 1);
+        m_aBtn[i].SetScaleFactor(fsx, fsy);
         m_aBtn[i].SetText(apszBtnText[i], adwBtnClr);
         CWin::RegisterButton(&m_aBtn[i]);
     }
@@ -67,8 +70,8 @@ void CSysMenuWin::Create()
         break;
     }
 
-    SetPosition((rInput.GetScreenWidth() - m_winBack.GetWidth()) / 2,
-        (rInput.GetScreenHeight() - m_winBack.GetHeight()) / 2);
+    SetPosition((800 - m_winBack.GetWidth()) / 2,
+        (600 - m_winBack.GetHeight()) / 2);
 }
 
 void CSysMenuWin::PreRelease()

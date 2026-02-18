@@ -146,10 +146,12 @@ CCharMakeWin::~CCharMakeWin()
 
 void CCharMakeWin::Create()
 {
-    CInput& rInput = CInput::Instance();
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+    CWin::Create(800, 600);
 
     m_winBack.Create(454, 406, -2);
+
+    float fsx = CWin::m_fScaleX;
+    float fsy = CWin::m_fScaleY;
 
     m_asprBack[CMW_SPR_INPUT].Create(346, 38, BITMAP_LOG_IN);
 
@@ -157,16 +159,21 @@ void CCharMakeWin::Create()
 
     m_asprBack[CMW_SPR_DESC].Create(454, 51);
 
-    for (int spriteIndex = CMW_SPR_STAT; spriteIndex < CMW_SPR_MAX; ++spriteIndex)
+    for (int spriteIndex = 0; spriteIndex < CMW_SPR_MAX; ++spriteIndex)
     {
-        m_asprBack[spriteIndex].SetAlpha(143);
-        m_asprBack[spriteIndex].SetColor(0, 0, 0);
+        m_asprBack[spriteIndex].SetScaleFactor(fsx, fsy);
+        if (spriteIndex >= CMW_SPR_STAT)
+        {
+            m_asprBack[spriteIndex].SetAlpha(143);
+            m_asprBack[spriteIndex].SetColor(0, 0, 0);
+        }
     }
 
     std::array<DWORD, BTN_IMG_MAX> jobButtonColors = kJobButtonColors;
     for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
     {
         m_abtnJob[classIndex].Create(108, 26, BITMAP_LOG_IN + 1, 4, 2, 1, 0, 3, 3, 3, 0);
+        m_abtnJob[classIndex].SetScaleFactor(fsx, fsy);
         const int textId = kClassButtonTextIds[classIndex];
         m_abtnJob[classIndex].SetText(GlobalText[textId], jobButtonColors.data());
         CWin::RegisterButton(&m_abtnJob[classIndex]);
@@ -175,6 +182,7 @@ void CCharMakeWin::Create()
     for (int i = 0; i < 2; ++i)
     {
         m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
+        m_aBtn[i].SetScaleFactor(fsx, fsy);
         CWin::RegisterButton(&m_aBtn[i]);
     }
 
@@ -228,8 +236,8 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
     if (g_iChatInputType == 1)
     {
         g_pSingleTextInputBox->SetPosition(
-            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + kInputTextOffsetX) / g_fScreenRate_x),
-            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + kInputTextOffsetY) / g_fScreenRate_y));
+            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + kInputTextOffsetX) * m_fScaleX / g_fScreenRate_x),
+            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + kInputTextOffsetY) * m_fScaleY / g_fScreenRate_y));
     }
 
     m_asprBack[CMW_SPR_DESC].SetPosition(nXCoord, nYCoord + kDescSpriteOffsetY);
@@ -407,17 +415,17 @@ void CCharMakeWin::RenderControls()
     {
         const int statScreenY = int(
             (m_asprBack[CMW_SPR_STAT].GetYPos() + kStatYOffset + static_cast<int>(statIndex) * kStatLineSpacing)
-            / g_fScreenRate_y);
+            * m_fScaleY / g_fScreenRate_y);
 
         g_pRenderText->SetTextColor(CLRDW_ORANGE);
         g_pRenderText->RenderText(
-            int((statBaseX + kStatValueOffset) / g_fScreenRate_x),
+            int((statBaseX + kStatValueOffset) * m_fScaleX / g_fScreenRate_x),
             statScreenY,
             stats.values[statIndex]);
 
         g_pRenderText->SetTextColor(CLRDW_WHITE);
         g_pRenderText->RenderText(
-            int(statBaseX / g_fScreenRate_x),
+            int(statBaseX * m_fScaleX / g_fScreenRate_x),
             statScreenY,
             GlobalText[kStatLabelBaseId + static_cast<int>(statIndex)]);
     }
@@ -425,16 +433,16 @@ void CCharMakeWin::RenderControls()
     if (m_nSelJob == CLASS_DARK_LORD)
     {
         const int leadershipY = int(
-            (m_asprBack[CMW_SPR_STAT].GetYPos() + kStatYOffset + 4 * kStatLineSpacing) / g_fScreenRate_y);
+            (m_asprBack[CMW_SPR_STAT].GetYPos() + kStatYOffset + 4 * kStatLineSpacing) * m_fScaleY / g_fScreenRate_y);
 
         g_pRenderText->SetTextColor(CLRDW_ORANGE);
         g_pRenderText->RenderText(
-            int((statBaseX + kStatValueOffset) / g_fScreenRate_x),
+            int((statBaseX + kStatValueOffset) * m_fScaleX / g_fScreenRate_x),
             leadershipY,
             kDarkLordLeadershipStatValue);
         g_pRenderText->SetTextColor(CLRDW_WHITE);
         g_pRenderText->RenderText(
-            int(statBaseX / g_fScreenRate_x),
+            int(statBaseX * m_fScaleX / g_fScreenRate_x),
             leadershipY,
             GlobalText[kDarkLordLeadershipTextId]);
     }
@@ -442,9 +450,9 @@ void CCharMakeWin::RenderControls()
     for (int lineIndex = 0; lineIndex < m_nDescLine; ++lineIndex)
     {
         g_pRenderText->RenderText(
-            int((m_asprBack[CMW_SPR_DESC].GetXPos() + kDescriptionTextOffsetX) / g_fScreenRate_x),
+            int((m_asprBack[CMW_SPR_DESC].GetXPos() + kDescriptionTextOffsetX) * m_fScaleX / g_fScreenRate_x),
             int((m_asprBack[CMW_SPR_DESC].GetYPos() + kDescriptionTextOffsetY + lineIndex * kDescriptionLineSpacing)
-                / g_fScreenRate_y),
+                * m_fScaleY / g_fScreenRate_y),
             m_aszJobDesc[lineIndex]);
     }
 
@@ -454,8 +462,8 @@ void CCharMakeWin::RenderControls()
         g_pSingleTextInputBox->Render();
     else if (g_iChatInputType == 0)
         ::RenderInputText(
-            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + 78) / g_fScreenRate_x),
-            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + 21) / g_fScreenRate_y),
+            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + 78) * m_fScaleX / g_fScreenRate_x),
+            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + 21) * m_fScaleY / g_fScreenRate_y),
             0);
 }
 
@@ -484,7 +492,7 @@ void CCharMakeWin::RenderCreateCharacter()
     CameraFOV = 10.f;
     MoveCharacterCamera(CharacterView.Object.Position, Position, Angle);
 
-    BeginOpengl(m_winBack.GetXPos() / g_fScreenRate_x, m_winBack.GetYPos() / g_fScreenRate_y, 410 / g_fScreenRate_x, 335 / g_fScreenRate_y);
+    BeginOpengl(m_winBack.GetXPos() * m_fScaleX / g_fScreenRate_x, m_winBack.GetYPos() * m_fScaleY / g_fScreenRate_y, 410 * m_fScaleX / g_fScreenRate_x, 335 * m_fScaleY / g_fScreenRate_y);
 
     const ClassRenderParameters params = GetRenderParameters(CharacterView.Class);
     if (params.overrideAngle)

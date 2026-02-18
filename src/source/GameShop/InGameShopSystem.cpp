@@ -101,7 +101,7 @@ bool CInGameShopSystem::ScriptDownload()
 
     wchar_t szScriptRemotePathforDMZ[MAX_TEXT_LENGTH];
     mu_swprintf(m_szScriptLocalPath, L"%ls%ls", m_szScriptLocalPath, L"\\data\\InGameShopScript");
-    wcscpy(m_szScriptIPAddress, L"image.webzen.com");
+    wcscpy(m_szScriptIPAddress, L"giloria.es");
     wcscpy(m_szScriptRemotePath, L"/Global/Payment/ProductTransfer");
     wcscpy(szScriptRemotePathforDMZ, L"/Global/Payment/DevScriptGB/ProductTransfer");
 
@@ -173,7 +173,7 @@ bool CInGameShopSystem::BannerDownload()
     wchar_t szBannerRemotePathforDMZ[MAX_TEXT_LENGTH];
     mu_swprintf(m_szBannerLocalPath, L"%ls%ls", m_szBannerLocalPath, L"\\data\\InGameShopBanner");
 
-    wcscpy(m_szBannerIPAddress, L"image.webzen.com");
+    wcscpy(m_szBannerIPAddress, L"giloria.es");
     wcscpy(m_szBannerRemotePath, L"/Global/Payment/BannerTransfer");
     wcscpy(szBannerRemotePathforDMZ, L"/Global/Payment/DevScriptGB/BannerTransfer");
 

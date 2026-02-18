@@ -41,19 +41,25 @@ void CServerSelWin::Create()
 
     m_iSelectServerBtnIndex = -1;
 
+    float fsx = CWin::m_fScaleX;
+    float fsy = CWin::m_fScaleY;
+
     int i;
 
     for (i = 0; i < SSW_SERVER_G_MAX; ++i)
     {
         m_aServerGroupBtn[i].Create(SERVER_GROUP_BTN_WIDTH, SERVER_GROUP_BTN_HEIGHT, BITMAP_LOG_IN, 4, 2, 1, -1, 3);
+        m_aServerGroupBtn[i].SetScaleFactor(fsx, fsy);
         CWin::RegisterButton(&m_aServerGroupBtn[i]);
     }
 
     for (i = 0; i < SSW_SERVER_MAX; ++i)
     {
         m_aServerBtn[i].Create(SERVER_BTN_WIDTH, SERVER_BTN_HEIGHT, BITMAP_LOG_IN + 1, 3, 2, 1);
+        m_aServerBtn[i].SetScaleFactor(fsx, fsy);
         CWin::RegisterButton(&m_aServerBtn[i]);
         m_aServerGauge[i].Create(160, 4, BITMAP_LOG_IN + 2);
+        m_aServerGauge[i].SetScaleFactor(fsx, fsy);
     }
 
     SImgInfo aiiDeco[2] =
@@ -63,6 +69,8 @@ void CServerSelWin::Create()
     };
     m_aBtnDeco[0].Create(&aiiDeco[0], 8, 19);
     m_aBtnDeco[1].Create(&aiiDeco[1], 60, 19);
+    m_aBtnDeco[0].SetScaleFactor(fsx, fsy);
+    m_aBtnDeco[1].SetScaleFactor(fsx, fsy);
 
     SImgInfo aiiArrow[2] =
     {
@@ -71,6 +79,8 @@ void CServerSelWin::Create()
     };
     m_aArrowDeco[0].Create(&aiiArrow[0], 1, 2);
     m_aArrowDeco[1].Create(&aiiArrow[1], 23, 2);
+    m_aArrowDeco[0].SetScaleFactor(fsx, fsy);
+    m_aArrowDeco[1].SetScaleFactor(fsx, fsy);
 
     SImgInfo aiiDescBg[WE_BG_MAX] =
     {

@@ -34,6 +34,8 @@ protected:
     POINT		m_ptPos;
     SIZE		m_Size;
     POINT		m_ptTemp;
+    float		m_fScaleX;
+    float		m_fScaleY;
 
     CPList		m_BtnList;
 
@@ -46,6 +48,8 @@ public:
     virtual void SetPosition(int nXCoord, int nYCoord);
     int GetXPos() { return m_ptPos.x; }
     int GetYPos() { return m_ptPos.y; }
+    float GetScaleX() const { return m_fScaleX; }
+    float GetScaleY() const { return m_fScaleY; }
     void SetSize(int nWidth, int nHeight, CHANGE_PRAM eChangedPram = XY);
     int GetWidth() { return m_Size.cx; }
     int GetHeight() { return m_Size.cy; }

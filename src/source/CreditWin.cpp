@@ -104,15 +104,14 @@ CCreditWin::~CCreditWin()
 
 void CCreditWin::Create()
 {
-	CInput rInput = CInput::Instance();
-
-	CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+	CWin::Create(800, 600);
 	CWin::SetBgAlpha(255);
 
-	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
-	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
+	float fScaleX = CWin::m_fScaleX;
+	float fScaleY = CWin::m_fScaleY;
 
 	m_aSpr[CRW_SPR_DECO].Create(189, 103, BITMAP_LOG_IN + 6);
+	m_aSpr[CRW_SPR_DECO].SetScaleFactor(fScaleX, fScaleY);
 	m_aSpr[CRW_SPR_LOGO].Create(290, 41, BITMAP_LOG_IN + 14, 0, NULL, 0, 0,
 		false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
 
@@ -124,15 +123,14 @@ void CCreditWin::Create()
 	}
 
 	m_btnClose.Create(54, 30, BITMAP_BUTTON + 2, 3, 2, 1);
+	m_btnClose.SetScaleFactor(fScaleX, fScaleY);
 	CWin::RegisterButton(&m_btnClose);
 
 	int nFontSize = 10;
-	switch (rInput.GetScreenWidth())
-	{
-	case 800:	nFontSize = 14;	break;
-	case 1024:	nFontSize = 18;	break;
-	case 1280:	nFontSize = 24;	break;
-	}
+	int screenW = CInput::Instance().GetScreenWidth();
+	if (screenW >= 1280) nFontSize = 24;
+	else if (screenW >= 1024) nFontSize = 18;
+	else if (screenW >= 800) nFontSize = 14;
 	HFONT fontHandle = CreateFont(nFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, GlobalText[0][0] ? GlobalText[0] : NULL);
 	m_font.reset(fontHandle);
 
@@ -153,11 +151,7 @@ void CCreditWin::SetPosition()
 	m_aSpr[CRW_SPR_PIC_R].SetPosition(400, 126);
 	m_aSpr[CRW_SPR_LOGO].SetPosition(241, 549);
 
-
-	CInput rInput = CInput::Instance();
-
-	int nBaseY = int(527.0f / 600.0f * (float)rInput.GetScreenHeight());
-	m_aSpr[CRW_SPR_DECO].SetPosition(rInput.GetScreenWidth() - m_aSpr[CRW_SPR_DECO].GetWidth(), nBaseY - m_aSpr[CRW_SPR_DECO].GetHeight());
+	m_aSpr[CRW_SPR_DECO].SetPosition(800 - m_aSpr[CRW_SPR_DECO].GetWidth(), 527 - m_aSpr[CRW_SPR_DECO].GetHeight());
 
 	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
 		m_aSpr[i].SetPosition(0, 42 * (i - CRW_SPR_TXT_HIDE0));

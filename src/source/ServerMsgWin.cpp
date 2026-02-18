@@ -72,8 +72,8 @@ void CServerMsgWin::RenderControls()
     int i;
     for (i = 0; i < m_nMsgLine; ++i)
     {
-        g_pRenderText->RenderText(int((CWin::GetXPos() + 11) / g_fScreenRate_x),
-            int((CWin::GetYPos() + 12 + i * 20) / g_fScreenRate_y),
+        g_pRenderText->RenderText(int((CWin::GetXPos() + 11) * CWin::m_fScaleX / g_fScreenRate_x),
+            int((CWin::GetYPos() + 12 + i * 20) * CWin::m_fScaleY / g_fScreenRate_y),
             m_aszMsg[i]);
     }
 }

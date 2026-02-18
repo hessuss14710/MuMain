@@ -67,16 +67,23 @@ void CLoginWin::Create()
 
     CWin::Create(329, 245, BITMAP_LOG_IN + 7);
 
+    float fsx = CWin::m_fScaleX;
+    float fsy = CWin::m_fScaleY;
+
     m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
     m_asprInputBox[LIW_PASSWORD].Create(156, 23, BITMAP_LOG_IN + 8);
+    m_asprInputBox[LIW_ACCOUNT].SetScaleFactor(fsx, fsy);
+    m_asprInputBox[LIW_PASSWORD].SetScaleFactor(fsx, fsy);
 
     for (int i = 0; i < 2; ++i)
     {
         m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
+        m_aBtn[i].SetScaleFactor(fsx, fsy);
         CWin::RegisterButton(&m_aBtn[i]);
     }
 
     m_aBtnRememberMe.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
+    m_aBtnRememberMe.SetScaleFactor(fsx, fsy);
     CWin::RegisterButton(&m_aBtnRememberMe);
 
     SAFE_DELETE(m_pUsernameInputBox);
@@ -128,9 +135,9 @@ void CLoginWin::SetPosition(int x, int y)
 
 	if (g_iChatInputType == 1)
 	{
-		const int boxX = int((x + 115) / g_fScreenRate_x);
-		m_pUsernameInputBox->SetPosition(boxX, int((y + 112) / g_fScreenRate_y));
-		m_pPasswordInputBox->SetPosition(boxX, int((y + 137) / g_fScreenRate_y));
+		const int boxX = int((x + 115) * m_fScaleX / g_fScreenRate_x);
+		m_pUsernameInputBox->SetPosition(boxX, int((y + 112) * m_fScaleY / g_fScreenRate_y));
+		m_pPasswordInputBox->SetPosition(boxX, int((y + 137) * m_fScaleY / g_fScreenRate_y));
 	}
 
 	m_aBtn[LIW_OK].SetPosition(x + 150, y + 178);
@@ -215,15 +222,15 @@ void CLoginWin::RenderControls()
     const int baseX = GetXPos();
     const int baseY = GetYPos();
 
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 113) / g_fScreenRate_y), GlobalText[450]);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 139) / g_fScreenRate_y), GlobalText[451]);
+    g_pRenderText->RenderText(int((baseX + 30) * m_fScaleX / g_fScreenRate_x), int((baseY + 113) * m_fScaleY / g_fScreenRate_y), GlobalText[450]);
+    g_pRenderText->RenderText(int((baseX + 30) * m_fScaleX / g_fScreenRate_x), int((baseY + 139) * m_fScaleY / g_fScreenRate_y), GlobalText[451]);
 
     wchar_t szServerName[MAX_TEXT_LENGTH] = {};
     const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? GlobalText[461] : GlobalText[460];
     mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    g_pRenderText->RenderText(int((baseX + 111) / g_fScreenRate_x), int((baseY + 80) / g_fScreenRate_y), szServerName);
+    g_pRenderText->RenderText(int((baseX + 111) * m_fScaleX / g_fScreenRate_x), int((baseY + 80) * m_fScaleY / g_fScreenRate_y), szServerName);
 
-    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), L"Remember me?");
+    g_pRenderText->RenderText(int((baseX + 130) * m_fScaleX / g_fScreenRate_x), int((baseY + 159) * m_fScaleY / g_fScreenRate_y), L"Remember me?");
 }
 
 void CLoginWin::RequestLogin()

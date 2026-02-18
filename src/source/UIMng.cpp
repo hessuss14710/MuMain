@@ -200,8 +200,8 @@ void CUIMng::CreateLoginScene()
 
     m_MsgWin.Create();
     m_WinList.AddHead(&m_MsgWin);
-    m_MsgWin.SetPosition((rInput.GetScreenWidth() - 352) / 2,
-        (rInput.GetScreenHeight() - 113) / 2);
+    m_MsgWin.SetPosition((800 - 352) / 2,
+        (600 - 113) / 2);
 
     m_SysMenuWin.Create();
     m_WinList.AddHead(&m_SysMenuWin);
@@ -212,20 +212,19 @@ void CUIMng::CreateLoginScene()
     m_LoginMainWin.Create();
     m_WinList.AddHead(&m_LoginMainWin);
 
-    int nBaseY = int(567.0f / 600.0f * (float)rInput.GetScreenHeight());
-    m_LoginMainWin.SetPosition(30, nBaseY - m_LoginMainWin.GetHeight() - 11);
+    m_LoginMainWin.SetPosition(30, 567 - m_LoginMainWin.GetHeight() - 11);
 
     m_ServerSelWin.Create();
     m_WinList.AddHead(&m_ServerSelWin);
     m_ServerSelWin.SetPosition(
-        (rInput.GetScreenWidth() - m_ServerSelWin.GetWidth()) / 2,
-        (rInput.GetScreenHeight() - m_ServerSelWin.GetHeight()) / 2);
+        (800 - m_ServerSelWin.GetWidth()) / 2,
+        (600 - m_ServerSelWin.GetHeight()) / 2);
 
     m_LoginWin.Create();
     m_WinList.AddHead(&m_LoginWin);
     m_LoginWin.SetPosition(
-        (rInput.GetScreenWidth() - m_LoginWin.GetWidth()) / 2,
-        (rInput.GetScreenHeight() - m_LoginWin.GetHeight()) * 2 / 3);
+        (800 - m_LoginWin.GetWidth()) / 2,
+        (600 - m_LoginWin.GetHeight()) * 2 / 3);
 
     m_CreditWin.Create();
     m_WinList.AddHead(&m_CreditWin);
@@ -244,13 +243,12 @@ void CUIMng::CreateCharacterScene()
 
     m_MsgWin.Create();
     m_WinList.AddHead(&m_MsgWin);
-    m_MsgWin.SetPosition((rInput.GetScreenWidth() - 352) / 2,
-        (rInput.GetScreenHeight() - 113) / 2);
+    m_MsgWin.SetPosition((800 - 352) / 2,
+        (600 - 113) / 2);
 
     m_ServerMsgWin.Create();
     m_WinList.AddHead(&m_ServerMsgWin);
-    int nBaseY = int(31.0f / 600.0f * (float)rInput.GetScreenHeight());
-    m_ServerMsgWin.SetPosition(10, nBaseY + 10);
+    m_ServerMsgWin.SetPosition(10, 41);
 
     m_SysMenuWin.Create();
     m_WinList.AddHead(&m_SysMenuWin);
@@ -260,14 +258,13 @@ void CUIMng::CreateCharacterScene()
 
     m_CharSelMainWin.Create();
     m_WinList.AddHead(&m_CharSelMainWin);
-    nBaseY = int(567.0f / 600.0f * (float)rInput.GetScreenHeight());
-    m_CharSelMainWin.SetPosition(22, nBaseY - m_CharSelMainWin.GetHeight() - 11);
+    m_CharSelMainWin.SetPosition(22, 567 - m_CharSelMainWin.GetHeight() - 11);
 
     m_CharMakeWin.Create();
     m_WinList.AddHead(&m_CharMakeWin);
 
-    m_CharMakeWin.SetPosition((rInput.GetScreenWidth() - 454) / 2,
-        (rInput.GetScreenHeight() - 406) / 2);
+    m_CharMakeWin.SetPosition((800 - 454) / 2,
+        (600 - 406) / 2);
 
     m_CharSelMainWin.UpdateDisplay();
     m_CharInfoBalloonMng.UpdateDisplay();
@@ -360,11 +357,9 @@ void CUIMng::CheckDockWin()
             rcMovWin.right + DOCK_EXTENT, rcMovWin.bottom + DOCK_EXTENT }
     };
 
-    CInput& rInput = CInput::Instance();
-
-    POINT pt[4] = { { 0, 0 }, { rInput.GetScreenWidth(), 0 },
-        { 0, rInput.GetScreenHeight() },
-        { rInput.GetScreenWidth(), rInput.GetScreenHeight() } };
+    POINT pt[4] = { { 0, 0 }, { 800, 0 },
+        { 0, 600 },
+        { 800, 600 } };
 
     if (::PtInRect(&rcDock[0], pt[0]))
     {
@@ -553,9 +548,8 @@ DOCKING:
 
 bool CUIMng::SetDockWinPosition(CWin* pMoveWin, int nDockX, int nDockY)
 {
-    CInput& rInput = CInput::Instance();
     RECT rcDummy;
-    RECT rcScreen = { 0, 0, rInput.GetScreenWidth(), rInput.GetScreenHeight() };
+    RECT rcScreen = { 0, 0, 800, 600 };
     RECT rcMoveWin = { nDockX, nDockY,
         nDockX + pMoveWin->GetWidth(), nDockY + pMoveWin->GetHeight() };
 

@@ -51,6 +51,7 @@ public:
     int GetHeight() const;
     void SetValue(std::uint32_t dwNow, std::uint32_t dwTotal);
     bool CursorInObject();
+    void SetScaleFactor(float fScaleX, float fScaleY);
     void SetAlpha(std::uint8_t dwAlpha);
     void SetColor(std::uint8_t byRed, std::uint8_t byGreen, std::uint8_t byBlue);
     void Show(bool bShow = true);

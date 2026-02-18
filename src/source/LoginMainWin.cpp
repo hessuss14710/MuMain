@@ -36,15 +36,22 @@ void CLoginMainWin::Create()
         m_aBtn[i].Create(54, 30, BITMAP_LOG_IN + 4 + i, 3, 2, 1);
 
     CWin::Create(
-        CInput::Instance().GetScreenWidth() - 30 * 2,
+        800 - 30 * 2,
         m_aBtn[0].GetHeight(),
         -2
     );
 
+    float fsx = CWin::m_fScaleX;
+    float fsy = CWin::m_fScaleY;
+
     for (int i = 0; i < LMW_BTN_MAX; ++i)
+    {
+        m_aBtn[i].SetScaleFactor(fsx, fsy);
         CWin::RegisterButton(&m_aBtn[i]);
+    }
 
     m_sprDeco.Create(189, 103, BITMAP_LOG_IN + 6, 0, nullptr, 105, 59);
+    m_sprDeco.SetScaleFactor(fsx, fsy);
 }
 
 void CLoginMainWin::PreRelease()
