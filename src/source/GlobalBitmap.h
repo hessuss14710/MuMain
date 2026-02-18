@@ -94,8 +94,8 @@ class CGlobalBitmap
 {
     enum
     {
-        MAX_WIDTH = 1024,
-        MAX_HEIGHT = 1024,
+        MAX_WIDTH = 2048,
+        MAX_HEIGHT = 2048,
     };
 
     using BitmapPtr = std::unique_ptr<BITMAP_t>;
@@ -119,8 +119,8 @@ public:
     CGlobalBitmap();
     virtual ~CGlobalBitmap();
 
-    GLuint LoadImage(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
-    bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    GLuint LoadImage(const std::wstring& filename, GLuint uiFilter = GL_LINEAR, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_LINEAR, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     void UnloadImage(GLuint uiBitmapIndex, bool bForce = false);
     void UnloadAllImages();
 
@@ -142,8 +142,8 @@ protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);
 
-    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
-    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    bool OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_LINEAR, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_LINEAR, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     void SplitFileName(IN const std::wstring& filepath, OUT std::wstring& filename, bool bIncludeExt);
     void SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot);
     void ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext, OUT std::wstring& out_filepath);
